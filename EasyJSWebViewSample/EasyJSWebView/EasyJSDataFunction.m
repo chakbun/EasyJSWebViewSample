@@ -10,45 +10,41 @@
 
 @implementation EasyJSDataFunction
 
-@synthesize funcID;
-@synthesize webView;
-@synthesize removeAfterExecute;
-
-- (id) initWithWebView:(EasyJSWebView *)_webView{
+- (instancetype)initWithWebView:(EasyJSWebView *)webView {
 	self = [super init];
     if (self) {
-		self.webView = _webView;
+		_webView = webView;
     }
     return self;
 }
 
-- (NSString*) execute{
+- (NSString *)execute{
 	return [self executeWithParams:nil];
 }
 
-- (NSString*) executeWithParam: (NSString*) param{
-	NSMutableArray* params = [[NSMutableArray alloc] initWithObjects:param, nil];
+- (NSString *)executeWithParam:(NSString *)param {
+	NSMutableArray *params = [[NSMutableArray alloc] initWithObjects:param,nil];
 	return [self executeWithParams:params];
 }
 
-- (NSString*) executeWithParams: (NSArray*) params{
-	NSMutableString* injection = [[NSMutableString alloc] init];
+- (NSString *)executeWithParams:(NSArray *)params {
+//	NSMutableString *injection = [[NSMutableString alloc] init];
+    NSMutableString *injection = [NSMutableString string];
 	
 	[injection appendFormat:@"EasyJS.invokeCallback(\"%@\", %@", self.funcID, self.removeAfterExecute ? @"true" : @"false"];
 	
 	if (params){
-		for (int i = 0, l = params.count; i < l; i++){
-			NSString* arg = [params objectAtIndex:i];
-			NSString* encodedArg = (NSString*) CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8);
-			
+		for (int i = 0, l = (int)params.count; i < l; i++){
+			NSString *arg = params[i];
+            NSString *encodedArg = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(NULL, (CFStringRef)arg, NULL, (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8));
 			[injection appendFormat:@", \"%@\"", encodedArg];
 		}
 	}
-	
+    
 	[injection appendString:@");"];
 	
-	if (self.webView){
-		return [self.webView stringByEvaluatingJavaScriptFromString:injection];
+	if (_webView){
+		return [_webView stringByEvaluatingJavaScriptFromString:injection];
 	}else{
 		return nil;
 	}

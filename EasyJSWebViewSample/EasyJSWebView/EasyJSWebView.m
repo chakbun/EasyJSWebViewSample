@@ -10,23 +10,26 @@
 
 @implementation EasyJSWebView
 
-@synthesize proxyDelegate;
-
-- (id)initWithFrame:(CGRect)frame{
+- (instancetype)initWithFrame:(CGRect)frame {
+    
     self = [super initWithFrame:frame];
+    
     if (self) {
 		[self initEasyJS];
     }
     return self;
 }
-- (id)init{
+
+- (instancetype)init {
 	self = [super init];
+    
     if (self) {
 		[self initEasyJS];
     }
     return self;
 }
-- (id)initWithCoder:(NSCoder *)aDecoder{
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
 	self = [super initWithCoder:aDecoder];
 	
 	if (self){
@@ -36,12 +39,12 @@
 	return self;
 }
 
-- (void) initEasyJS{
-	self.proxyDelegate = [[EasyJSWebViewProxyDelegate alloc] init];
-	self.delegate = self.proxyDelegate;
+- (void)initEasyJS {
+	_proxyDelegate = [[EasyJSWebViewProxyDelegate alloc] init];
+	self.delegate =self.proxyDelegate;
 }
 
-- (void) setDelegate:(id<UIWebViewDelegate>)delegate{
+- (void)setDelegate:(id<UIWebViewDelegate>)delegate {
 	if (delegate != self.proxyDelegate){
 		self.proxyDelegate.realDelegate = delegate;
 	}else{
@@ -49,14 +52,11 @@
 	}
 }
 
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name{
+- (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name {
 	[self.proxyDelegate addJavascriptInterfaces:interface WithName:name];
 }
 
-- (void) dealloc{
-	[super dealloc];
-	
-	[self.proxyDelegate release];
+- (void)dealloc {
 	self.proxyDelegate = nil;
 }
 

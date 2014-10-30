@@ -10,9 +10,9 @@
 
 @interface EasyJSWebViewProxyDelegate : NSObject<UIWebViewDelegate>
 
-@property (nonatomic, retain) NSMutableDictionary* javascriptInterfaces;
+@property (nonatomic, retain) NSMutableDictionary *javascriptInterfaces;
 @property (nonatomic, retain) id<UIWebViewDelegate> realDelegate;
 
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name;
+- (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name;
 
 @end

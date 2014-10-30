@@ -14,7 +14,7 @@
  This is the content of easyjs-inject.js
  Putting it inline in order to prevent loading from files
 */
-NSString* INJECT_JS = @"window.EasyJS = {\
+NSString const *INJECT_JS = @"window.EasyJS = {\
 __callbacks: {},\
 \
 invokeCallback: function (cbID, removeAfterExecute){\
@@ -81,18 +81,20 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 
 @implementation EasyJSWebViewProxyDelegate
 
-@synthesize realDelegate;
-@synthesize javascriptInterfaces;
+//@synthesize realDelegate;
+//@synthesize javascriptInterfaces;
 
-- (void) addJavascriptInterfaces:(NSObject*) interface WithName:(NSString*) name{
-	if (! self.javascriptInterfaces){
+- (void)addJavascriptInterfaces:(NSObject *)interface WithName:(NSString *)name {
+	if (!self.javascriptInterfaces) {
 		self.javascriptInterfaces = [[NSMutableDictionary alloc] init];
 	}
 	
 	[self.javascriptInterfaces setValue:interface forKey:name];
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error{
+#pragma mark --UIWebView Delegate
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
 	[self.realDelegate webView:webView didFailLoadWithError:error];
 }
 
@@ -117,7 +119,7 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 		NSString* method = [(NSString*)[components objectAtIndex:2]
 							stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 		
-		NSObject* interface = [javascriptInterfaces objectForKey:obj];
+		NSObject* interface = [_javascriptInterfaces objectForKey:obj];
 		
 		// execute the interfacing method
 		SEL selector = NSSelectorFromString(method);
@@ -126,14 +128,15 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 		invoker.selector = selector;
 		invoker.target = interface;
 		
-		NSMutableArray* args = [[NSMutableArray alloc] init];
+//		NSMutableArray* args = [[NSMutableArray alloc] init];
+        NSMutableArray *args = [NSMutableArray array];
 		
 		if ([components count] > 3){
 			NSString *argsAsString = [(NSString*)[components objectAtIndex:3]
 									  stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 			
 			NSArray* formattedArgs = [argsAsString componentsSeparatedByString:@":"];
-			for (int i = 0, j = 0, l = [formattedArgs count]; i < l; i+=2, j++){
+			for (int i = 0, j = 0, l = (int)[formattedArgs count]; i < l; i+=2, j++){
 				NSString* type = ((NSString*) [formattedArgs objectAtIndex:i]);
 				NSString* argStr = ((NSString*) [formattedArgs objectAtIndex:i + 1]);
 				
@@ -164,8 +167,6 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 			}
 		}
 		
-		[args release];
-		
 		return NO;
 	}
 	
@@ -176,14 +177,15 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 	return [self.realDelegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
 }
 
-- (void)webViewDidStartLoad:(UIWebView *)webView{
+- (void)webViewDidStartLoad:(UIWebView *)webView {
 	[self.realDelegate webViewDidStartLoad:webView];
 	
 	if (! self.javascriptInterfaces){
 		self.javascriptInterfaces = [[NSMutableDictionary alloc] init];
 	}
 	
-	NSMutableString* injection = [[NSMutableString alloc] init];
+//	NSMutableString* injection = [[NSMutableString alloc] init];
+    NSMutableString *injection = [NSMutableString string];
 	
 	//inject the javascript interface
 	for(id key in self.javascriptInterfaces) {
@@ -211,28 +213,11 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 		[injection appendString:@"]);"];
 	}
 	
-	
 	NSString* js = INJECT_JS;
 	//inject the basic functions first
 	[webView stringByEvaluatingJavaScriptFromString:js];
 	//inject the function interface
 	[webView stringByEvaluatingJavaScriptFromString:injection];
-	
-	[injection release];
-}
-
-- (void)dealloc{
-	if (self.javascriptInterfaces){
-		[self.javascriptInterfaces release];
-		self.javascriptInterfaces = nil;
-	}
-	
-	if (self.realDelegate){
-		[self.realDelegate release];
-		self.realDelegate = nil;
-	}
-	
-	[super dealloc];
 }
 
 @end
