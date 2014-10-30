@@ -14,7 +14,7 @@
  This is the content of easyjs-inject.js
  Putting it inline in order to prevent loading from files
 */
-NSString const *INJECT_JS = @"window.EasyJS = {\
+NSString *INJECT_JS = @"window.EasyJS = {\
 __callbacks: {},\
 \
 invokeCallback: function (cbID, removeAfterExecute){\
@@ -213,9 +213,8 @@ return EasyJS.call(obj, method, Array.prototype.slice.call(arguments));\
 		[injection appendString:@"]);"];
 	}
 	
-	NSString* js = INJECT_JS;
 	//inject the basic functions first
-	[webView stringByEvaluatingJavaScriptFromString:js];
+	[webView stringByEvaluatingJavaScriptFromString:INJECT_JS];
 	//inject the function interface
 	[webView stringByEvaluatingJavaScriptFromString:injection];
 }
